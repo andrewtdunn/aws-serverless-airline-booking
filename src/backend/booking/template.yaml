@@ -11,6 +11,7 @@ Globals:
         Environment:
             Variables:
                 POWERTOOLS_SERVICE_NAME: booking
+                POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
                 LOG_LEVEL: INFO
 
 Parameters:
@@ -38,61 +39,76 @@ Parameters:
         Type: AWS::SSM::Parameter::Value<String>
         Description: Parameter Name for AWS AppSync API ID
 
+    LogRetentionInDays:
+        Type: Number
+        Default: 14
+        Description: CloudWatch Logs retention period
+
+    SharedLibsLayer:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Project shared libraries Lambda Layer ARN
+        SharedLibsLayer: arn:aws:lambda:us-east-2:975049884736:layer:ProjectSharedLibs:3
+
 Resources:
     ConfirmBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-ConfirmBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-ConfirmBooking-${Stage}
             Handler: confirm.lambda_handler
             CodeUri: src/confirm-booking
-            Runtime: python3.7
+            Layers:
+                - !Ref SharedLibsLayer
+            Runtime: python3.9
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - Version: '2012-10-17'
+                - Version: "2012-10-17"
                   Statement:
-                    Action: dynamodb:UpdateItem
-                    Effect: Allow
-                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+                      Action: dynamodb:UpdateItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
 
     CancelBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-CancelBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-CancelBooking-${Stage}
             Handler: cancel.lambda_handler
             CodeUri: src/cancel-booking
-            Runtime: python3.7
+            Layers:
+                - !Ref SharedLibsLayer
+            Runtime: python3.9
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - Version: '2012-10-17'
+                - Version: "2012-10-17"
                   Statement:
-                    Action: dynamodb:UpdateItem
-                    Effect: Allow
-                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
-
+                      Action: dynamodb:UpdateItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
 
     ReserveBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-ReserveBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-ReserveBooking-${Stage}
             Handler: reserve.lambda_handler
             CodeUri: src/reserve-booking
-            Runtime: python3.7
+            Layers:
+                - !Ref SharedLibsLayer
+            Runtime: python3.9
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - Version: '2012-10-17'
+                - Version: "2012-10-17"
                   Statement:
-                    Action: dynamodb:PutItem
-                    Effect: Allow
-                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+                      Action: dynamodb:PutItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
 
     BookingTopic:
         Type: AWS::SNS::Topic
@@ -100,10 +116,12 @@ Resources:
     NotifyBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-NotifyBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-NotifyBooking-${Stage}
             Handler: notify.lambda_handler
             CodeUri: src/notify-booking
-            Runtime: python3.7
+            Layers:
+                - !Ref SharedLibsLayer
+            Runtime: python3.9
             MemorySize: 256
             Environment:
                 Variables:
@@ -112,6 +130,30 @@ Resources:
             Policies:
                 - SNSPublishMessagePolicy:
                       TopicName: !Sub ${BookingTopic.TopicName}
+
+    ConfirmBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${ConfirmBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
+
+    CancelBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${CancelBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
+
+    ReserveBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${ReserveBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
+
+    NotifyBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${NotifyBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
 
     StatesExecutionRole:
         Type: AWS::IAM::Role
