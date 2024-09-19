@@ -9,7 +9,7 @@ DEPLOYMENT_BUCKET_NAME ?= "xxxxxxxx"   # S3 Bucket
 GRAPHQL_API_ID ?= " xxxxx"  
 BOOKING_TABLE_NAME ?= "xxxxxxx"  #dynamodb BOOKING_TABLE_NAME
 REGION ?= us-east=2
-SHARED_LIBS_LAYER ?= "arn:aws:lambda:us-x-x:xxxxxxxxxxx:layer:ProjectSharedLibs:x"   # add your own a shared libs_layer in lambda layers 
+SHARED_LIBS_LAYER ?= "arn:aws:lambda:us-east-2:969302047381:layer:ProjectSharedLibs:1"   # add your own a shared libs_layer in lambda layers 
 
 
 target:
