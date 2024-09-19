@@ -36,7 +36,7 @@ delete.shared-lambda-layers: ##=> Delete shared Lambda layers stack
 	$(MAKE) -C src/backend/shared/libs delete
 
 deploy.payment: ##=> Deploy Payment service using SAM
-    $(MAKE) -C src/backend/payment deploy SHARED_LIBS_LAYER=$(SHARED_LIBS_LAYER)
+    $(MAKE) -C src/backend/payment deploy SHARED_LIBS_LAYER=${SHARED_LIBS_LAYER}
 
 deploy.shared-lambda-layers: ##=> Deploy shared Lambda Layers using SAM
 	$(MAKE) -C src/backend/shared/libs deploy
