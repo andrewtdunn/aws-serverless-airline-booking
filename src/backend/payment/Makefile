@@ -1,5 +1,5 @@
 PROFILE := "archive"
-SHARED_LIBS_LAYER ?= "arn:aws:lambda:us-east-2:969302047381:layer:ProjectSharedLibs:1"   # add your own a shared libs_layer 
+SHARED_LIBS_LAYER ?= "arn:aws:lambda:us-east-2:969302047381:layer:Full:1"   # add your own a shared libs_layer 
 
 target:
 	@$(MAKE) pr
@@ -48,7 +48,7 @@ deploy: ##=> Deploy payment service using SAM
         --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
         --parameter-overrides \
             Stage=$${AWS_BRANCH} \
-            SharedLibsLayer=$(SHARED_LIBS_LAYER)
+            SharedLibsLayer=${SHARED_LIBS_LAYER}
 
 
 delete: ##=> Delete payment service
