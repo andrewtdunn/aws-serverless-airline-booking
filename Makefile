@@ -8,9 +8,9 @@ STACK_NAME ?= "xxxxxxxx"         # cloudformation stack
 DEPLOYMENT_BUCKET_NAME ?= "xxxxxxxx"   # S3 Bucket 
 GRAPHQL_API_ID ?= " xxxxx"  
 BOOKING_TABLE_NAME ?= "xxxxxxx"  #dynamodb BOOKING_TABLE_NAME
-REGION ?= us-east=2
-# make init ?= "arn:aws:lambda:us-east-2:969302047381:layer:ProjectSharedLibs:1"   # add your own a shared libs_layer in lambda layers 
-make init
+REGION ?= us-east-2
+SHARED_LIBS_LAYER ?= "arn:aws:lambda:us-x-x:xxxxxxxxxxx:layer:ProjectSharedLibs:x"   # add your own a shared libs_layer in lambda layers 
+
 
 target:
 	$(info ${HELP_MESSAGE})
@@ -36,7 +36,7 @@ delete.shared-lambda-layers: ##=> Delete shared Lambda layers stack
 	$(MAKE) -C src/backend/shared/libs delete
 
 deploy.payment: ##=> Deploy Payment service using SAM
-    $(MAKE) -C src/backend/payment deploy #SHARED_LIBS_LAYER=$(SHARED_LIBS_LAYER)
+    $(MAKE) -C src/backend/payment deploy SHARED_LIBS_LAYER=$(SHARED_LIBS_LAYER)
 
 deploy.shared-lambda-layers: ##=> Deploy shared Lambda Layers using SAM
 	$(MAKE) -C src/backend/shared/libs deploy
